@@ -5,14 +5,20 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl
 
 # Deezer API credentials
+
+# ini adalah baris kode untuk memasukan api dari web deezer
 DEEZER_API_URL = "https://deezerdevs-deezer.p.rapidapi.com/search"
 RAPIDAPI_KEY = "4d50955690msh8fb5e73e2ae52f2p191201jsn7f96a0c42034"
 RAPIDAPI_HOST = "deezerdevs-deezer.p.rapidapi.com"
 
+
+# ini adlah class untuk membuat aplikasi music player keseluruhan
 class MusicPlayerWindow(QMainWindow):
+    # ini adalah kode untuk inisialisai yang akan di eksekusi pertama kali walau tidak di panggil manual
     def __init__(self):
         super().__init__()
-
+        
+        # untuk memnampilakn judul di windows aplikasi
         self.setWindowTitle("Deezer Music Player")
         self.setGeometry(100, 100, 400, 400)
 
@@ -23,19 +29,22 @@ class MusicPlayerWindow(QMainWindow):
     def setup_ui(self):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
-
+    
         self.layout = QVBoxLayout(self.central_widget)
-
+        # untuk membuat label serach song di atas tombol search
         self.label = QLabel("Search for a song:", self)
         self.layout.addWidget(self.label)
-
+        
+        # membuat tombol search, ketika tombol di klik akan konek ke metode search
         self.search_button = QPushButton("Search", self)
         self.search_button.clicked.connect(self.search_song)
         self.layout.addWidget(self.search_button)
-
+        
+        # untuk memasukan kata kunci lagu
         self.search_input = QLineEdit(self)
         self.layout.addWidget(self.search_input)
-
+        
+        # perintah untuk memutas musik ketika di lakukan double klik
         self.list_widget = QListWidget(self)
         self.list_widget.itemDoubleClicked.connect(self.play_song)
         self.layout.addWidget(self.list_widget)
@@ -57,7 +66,8 @@ class MusicPlayerWindow(QMainWindow):
         self.layout.addWidget(self.next_button)
 
         self.current_song_index = None
-
+    
+    # metode untuk mencari lagu dengan api deezer
     def search_song(self):
         query = self.search_input.text()
 
@@ -65,6 +75,7 @@ class MusicPlayerWindow(QMainWindow):
             self.list_widget.clear()
 
             headers = {
+                # kode ini di definisikan di bagian paling atas
                 "X-RapidAPI-Key": RAPIDAPI_KEY,
                 "X-RapidAPI-Host": RAPIDAPI_HOST
             }
@@ -74,17 +85,20 @@ class MusicPlayerWindow(QMainWindow):
             }
 
             response = requests.get(DEEZER_API_URL, headers=headers, params=params)
-
+            
+            # untuk menampilkan data hasil pencarian jika request ke deezer ok
             if response.status_code == 200:
                 data = response.json()
                 tracks = data['data']
-
+                
+                # menampilakan judul lagu, artis, nama
                 for track in tracks:
                     title = track['title']
                     artist = track['artist']['name']
                     item = f"{title} - {artist}"
                     self.list_widget.addItem(item)
-
+    
+    # untuk memutar musik
     def play_song(self, item):
         self.current_song_index = self.list_widget.currentRow()
         track_info = item.text()
@@ -136,6 +150,7 @@ class MusicPlayerWindow(QMainWindow):
                 self.play_song(self.list_widget.currentItem())
 
 
+ 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MusicPlayerWindow()
